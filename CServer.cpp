@@ -6,6 +6,7 @@ CServer::CServer(boost::asio::io_context& ioc, unsigned short& port):m_ioc(ioc),
 	
 }
 
+//启动服务器,监听连接
 void CServer::Start()
 {
 	auto self = shared_from_this();
@@ -13,10 +14,12 @@ void CServer::Start()
 		try {
 			//出错
 			if (ec) {
+				//出错则重连
 				self->Start();
 				return;
 			}
 			//创建新连接并创建HttpConnect类管理连接
+			//处理的是已经建立的连接
 			std::make_shared<HttpConnection>(std::move(self->m_socket))->Start();
 			//继续接收新连接
 			self->Start();

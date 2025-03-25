@@ -1,6 +1,6 @@
 #include "HttpConnection.h"
 #include <iostream>
-//socket无移动构造，要用std::move()移动构造
+//socket无法拷贝，所以不能用默认构造，要用std::move()移动构造
 HttpConnection::HttpConnection(tcp::socket socket):m_socket(std::move(socket))
 {
 
@@ -17,6 +17,7 @@ void HttpConnection::Start()
 					return;
 				}
 				//无需做粘包处理
+				//处理读到的数据
 				boost::ignore_unused(bytes_transferred);
 				self->HandleReq();
 				self->CheckDeadline();
@@ -55,7 +56,7 @@ void HttpConnection::HandleReq()
 	m_response.keep_alive(false);
 	if (m_request.method() == http::verb::get) {
 		//处理get请求
-		bool success = LogicSystem::GetInstance()->HandleGet(m_request.target(),shared_from_this());
+		bool success = LogicSystem::Getinstance()->HandleGet(m_request.target(),shared_from_this());
 		if (!success) {
 			m_response.result(http::status::not_found);//404
 			m_response.set(http::field::content_type, "text/plain");
