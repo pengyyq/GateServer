@@ -1,8 +1,11 @@
 #pragma once
-#include"const.h"
-class HttpConnection;
-typedef std::function<void(std::shared_ptr<HttpConnection>)>HttpHandler;
+#include "Singleton.h"
+#include <functional>
+#include <map>
+#include "const.h"
 
+class HttpConnection;
+typedef std::function<void(std::shared_ptr<HttpConnection>)> HttpHandler;
 class LogicSystem :public Singleton<LogicSystem>
 {
 	friend class Singleton<LogicSystem>;
@@ -14,9 +17,7 @@ public:
 	bool HandlePost(std::string, std::shared_ptr<HttpConnection>);
 private:
 	LogicSystem();
-	//post和get的回调函数map,key为url,value为回调函数
-	std::map<std::string,HttpHandler> m_GetHandlers;
-	std::map<std::string, HttpHandler> m_PostHandlers;
+	std::map<std::string, HttpHandler> _post_handlers;
+	std::map<std::string, HttpHandler> _get_handlers;
 };
-
 

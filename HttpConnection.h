@@ -1,40 +1,35 @@
 #pragma once
-#include"const.h"
-#include"LogicSystem.h"
-class HttpConnection:public std::enable_shared_from_this<HttpConnection>
+#include "const.h"
+
+class HttpConnection : public std::enable_shared_from_this<HttpConnection>
 {
 	friend class LogicSystem;
 public:
-	HttpConnection(tcp::socket socket);
+	HttpConnection(boost::asio::io_context& ioc);
 	void Start();
-
-	//��ʱ���
+	void PreParseGetParam();
+	tcp::socket& GetSocket() {
+		return _socket;
+	}
+public:
 	void CheckDeadline();
-	//
 	void WriteResponse();
-
-	//��������
 	void HandleReq();
+	tcp::socket  _socket;
+	// The buffer for performing reads.
+	beast::flat_buffer  _buffer{ 8192 };
 
-private:
-	tcp::socket m_socket;//用于读写的套接字
-	beast::flat_buffer m_buffer{ 8192 };//用于读写的缓冲区
-	http::request<http::dynamic_body> m_request;//请求对象，用于解析请求数据
-	http::response<http::dynamic_body>m_response;//响应对象，回应客户端
+	// The request message.
+	http::request<http::dynamic_body> _request;
 
-	//实现get参数解析
-	std::string m_get_url;//GET请求的url
-	std::unordered_map<std::string, std::string>m_get_param;//GET请求的参数
+	// The response message.
+	http::response<http::dynamic_body> _response;
 
-	//实现post参数解析
-	std::string m_post_url;//POST请求的url
-	std::unordered_map<std::string, std::string>m_post_param;//POST请求的参数
+	// The timer for putting a deadline on connection processing.
+	net::steady_timer deadline_{
+		_socket.get_executor(), std::chrono::seconds(60) };
 
-	//超时定时器
-	net::steady_timer m_deadline{
-		m_socket.get_executor(),
-		std::chrono::seconds(30)
-	};
-
+	std::string _get_url;
+	std::unordered_map<std::string, std::string> _get_params;
 };
 

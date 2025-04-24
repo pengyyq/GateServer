@@ -14,7 +14,7 @@ protected:
     static std::shared_ptr<T> m_instance;
 
 public:
-    static std::shared_ptr<T>Getinstance() {
+    static std::shared_ptr<T>GetInstance() {
         static std::once_flag s_flag;
         std::call_once(s_flag, [&]() {
             m_instance = std::shared_ptr<T>(new T);
